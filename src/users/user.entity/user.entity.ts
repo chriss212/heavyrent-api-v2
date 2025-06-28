@@ -1,24 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { Machine } from "src/machines/machine.entity/machine.entity";
-import { RentalRequest } from "src/rentals/rental-request.entity/rental-request.entity";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Machine } from '../../machines/machine.entity/machine.entity';
+import { RentalRequest } from '../../rentals/rental-request.entity/rental-request.entity';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    name: string
+  @Column()
+  name: string;
 
-    @Column({ unique: true})
-    email: string
+  @Column({ unique: true })
+  email: string;
 
-    @Column({ default: 'customer' })
-    role: string
+  @Column({ default: 'customer' })
+  role: string;
 
-    @OneToMany(() => Machine, machine => machine.createdBy)
-    machines: Machine[]
+  @OneToMany(() => Machine, (machine) => machine.createdBy)
+  machines: Machine[];
 
-    @OneToMany(() => RentalRequest, rental => rental.user)
-    rentals: RentalRequest[]
+  @OneToMany(() => RentalRequest, (rental) => rental.user)
+  rentals: RentalRequest[];
 }
