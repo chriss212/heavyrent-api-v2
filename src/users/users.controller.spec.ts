@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User } from './user.entity/user.entity';
@@ -13,7 +14,7 @@ describe('UsersController', () => {
     email: 'test@example.com',
     role: 'customer',
     machines: [],
-    rentals: []
+    rentals: [],
   };
 
   const mockUsersService = {
@@ -46,7 +47,7 @@ describe('UsersController', () => {
   describe('findOne', () => {
     it('debería retornar un usuario cuando se proporciona un ID válido', async () => {
       const userId = '1';
-      
+
       mockUsersService.findById.mockResolvedValue(mockUser);
 
       const result = await controller.findOne(userId);
@@ -55,20 +56,24 @@ describe('UsersController', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('debería retornar null cuando el usuario con ID no existe', async () => {
+    it('debería lanzar NotFoundException cuando el usuario con ID no existe', async () => {
       const userId = '999';
-      
+
       mockUsersService.findById.mockResolvedValue(null);
 
-      const result = await controller.findOne(userId);
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        'Usuario no encontrado',
+      );
 
       expect(service.findById).toHaveBeenCalledWith(Number(userId));
-      expect(result).toBeNull();
     });
 
     it('debería manejar la conversión de ID string a número', async () => {
       const userId = '123';
-      
+
       mockUsersService.findById.mockResolvedValue(mockUser);
 
       const result = await controller.findOne(userId);
@@ -77,26 +82,34 @@ describe('UsersController', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('debería manejar ID cero', async () => {
+    it('debería lanzar NotFoundException para ID cero cuando no existe', async () => {
       const userId = '0';
-      
+
       mockUsersService.findById.mockResolvedValue(null);
 
-      const result = await controller.findOne(userId);
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        'Usuario no encontrado',
+      );
 
       expect(service.findById).toHaveBeenCalledWith(0);
-      expect(result).toBeNull();
     });
 
-    it('debería manejar ID negativo', async () => {
+    it('debería lanzar NotFoundException para ID negativo cuando no existe', async () => {
       const userId = '-1';
-      
+
       mockUsersService.findById.mockResolvedValue(null);
 
-      const result = await controller.findOne(userId);
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        'Usuario no encontrado',
+      );
 
       expect(service.findById).toHaveBeenCalledWith(-1);
-      expect(result).toBeNull();
     });
   });
 });
