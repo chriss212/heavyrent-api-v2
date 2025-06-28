@@ -3,24 +3,23 @@ import { MachinesService } from './machines.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Machine } from './machine.entity/machine.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { CreateMachineDto } from './dto/create-machine.dto';
 
 describe('MachinesService', () => {
-  let service: MachinesService
-  let repo: jest.Mocked<Repository<Machine>>
-  let usersService: jest.Mocked<UsersService>
-
+  let service: MachinesService;
+  let repo: jest.Mocked<Repository<Machine>>;
+  let usersService: jest.Mocked<UsersService>;
 
   const mockRepo = {
     create: jest.fn(),
     save: jest.fn(),
     find: jest.fn(),
-  }
+  };
 
   const mockUsersService = {
     findById: jest.fn(),
-  }
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,22 +34,21 @@ describe('MachinesService', () => {
           useValue: mockUsersService,
         },
       ],
-    }).compile()
+    }).compile();
 
     service = module.get<MachinesService>(MachinesService);
     repo = module.get(getRepositoryToken(Machine));
     usersService = module.get(UsersService);
-  })
+  });
 
   afterEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   it('debería crear una máquina si el usuario existe', async () => {
     const dto = { name: 'Excavadora', description: 'Para cavar' };
     const user = { id: 1 };
     const machine = { ...dto, createdBy: user, available: true };
-
 
     mockUsersService.findById.mockResolvedValue(user);
     mockRepo.create.mockReturnValue(machine);
@@ -62,15 +60,14 @@ describe('MachinesService', () => {
     expect(result.available).toBe(true);
   });
 
-
   it('debería lanzar error si el usuario no existe', async () => {
     usersService.findById.mockResolvedValue(null);
     const dto = { name: 'Tractor', description: 'Agrícola' };
 
-    await expect(service.create(dto, { userId: 999 })).rejects.toThrow('usuario no encontrado');
+    await expect(service.create(dto, { userId: 999 })).rejects.toThrow(
+      'usuario no encontrado',
+    );
   });
-
-
 
   it('debería retornar todas las máquinas con sus relaciones', async () => {
     const machines = [{ id: 1, name: 'Camión', createdBy: { id: 1 } }];
@@ -81,31 +78,36 @@ describe('MachinesService', () => {
     expect(result).toEqual(machines);
   });
 
-
-
   it('debería crear una máquina con campos mínimos esperados', async () => {
-    const dto = { name: 'Grúa', description: 'Levanta cosas' }
-    const user = { id: 2, name: 'Luis' }
-    const machine = { ...dto, createdBy: user, available: true }
+    const dto = { name: 'Grúa', description: 'Levanta cosas' };
+    const user = { id: 2, name: 'Luis' };
+    const machine = { ...dto, createdBy: user, available: true };
 
     mockUsersService.findById.mockResolvedValue(user);
     mockRepo.create.mockReturnValue(machine);
-    mockRepo.save.mockResolvedValue({ id: 42, ...machine })
+    mockRepo.save.mockResolvedValue({ id: 42, ...machine });
 
-    const result = await service.create(dto, { userId: 2 })
+    const result = await service.create(dto, { userId: 2 });
 
-    expect(result).toEqual({ id: 42, ...machine })
+    expect(result).toEqual({ id: 42, ...machine });
   });
-
-
 
   it('debería llamar a repo.create con los datos correctos', async () => {
     const dto = { name: 'Bulldozer', description: 'Nivelar terreno' };
     const user = { id: 5 };
 
     mockUsersService.findById.mockResolvedValue(user);
-    mockRepo.create.mockReturnValue({ ...dto, createdBy: user, available: true });
-    mockRepo.save.mockResolvedValue({ id: 20, ...dto, createdBy: user, available: true });
+    mockRepo.create.mockReturnValue({
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
+    mockRepo.save.mockResolvedValue({
+      id: 20,
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
 
     await service.create(dto, { userId: 5 });
 
@@ -116,9 +118,6 @@ describe('MachinesService', () => {
       available: true,
     });
   });
-
-
-
 
   it('debería llamar a repo.save con el objeto creado', async () => {
     const dto = { name: 'Grúa', description: 'Levanta cargas' };
@@ -132,16 +131,24 @@ describe('MachinesService', () => {
     await service.create(dto, { userId: 6 });
 
     expect(mockRepo.save).toHaveBeenCalledWith(machine);
-
-    })
+  });
 
   it('debería llamar a usersService.findById con el userId correcto', async () => {
     const dto = { name: 'Montacargas', description: 'Transporte de carga' };
     const user = { id: 3 };
 
     mockUsersService.findById.mockResolvedValue(user);
-    mockRepo.create.mockReturnValue({ ...dto, createdBy: user, available: true });
-    mockRepo.save.mockResolvedValue({ id: 15, ...dto, createdBy: user, available: true });
+    mockRepo.create.mockReturnValue({
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
+    mockRepo.save.mockResolvedValue({
+      id: 15,
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
 
     await service.create(dto, { userId: 3 });
 
@@ -164,8 +171,17 @@ describe('MachinesService', () => {
     const user = { id: 4 };
 
     mockUsersService.findById.mockResolvedValue(user);
-    mockRepo.create.mockReturnValue({ ...dto, createdBy: user, available: true });
-    mockRepo.save.mockResolvedValue({ id: 25, ...dto, createdBy: user, available: true });
+    mockRepo.create.mockReturnValue({
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
+    mockRepo.save.mockResolvedValue({
+      id: 25,
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
 
     const result = await service.create(dto, { userId: 4 });
 
@@ -177,15 +193,21 @@ describe('MachinesService', () => {
     const user = { id: 7 };
 
     mockUsersService.findById.mockResolvedValue(user);
-    mockRepo.create.mockReturnValue({ ...dto, createdBy: user, available: true });
-    mockRepo.save.mockResolvedValue({ id: 35, ...dto, createdBy: user, available: true });
+    mockRepo.create.mockReturnValue({
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
+    mockRepo.save.mockResolvedValue({
+      id: 35,
+      ...dto,
+      createdBy: user,
+      available: true,
+    });
 
     const result = await service.create(dto, { userId: 7 });
 
     expect(result.description).toBe('');
     expect(result.name).toBe('Martillo neumático');
   });
-
-
-
-})
+});
