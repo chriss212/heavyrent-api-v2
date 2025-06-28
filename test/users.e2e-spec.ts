@@ -78,4 +78,56 @@ describe('API Express', () => {
       expect([200, 204]).toContain(res.status);
     });
   });
+  
+  describe('POST /users duplicados', () => {
+    it('debe retornar el usuario existente cuando email ya existe', async () => {
+      const userData = { name: 'Carlos', email: 'carlos@example.com' };
+      const firstRes = await request(app.getHttpServer())
+        .post('/users')
+        .send(userData);
+      
+      const secondRes = await request(app.getHttpServer())
+        .post('/users')
+        .send({ name: 'Carlos Alberto', email: 'carlos@example.com' });
+      
+      expect(firstRes.status).toBe(201);
+      expect(secondRes.status).toBe(201);
+      expect(secondRes.body.id).toBe(firstRes.body.id);
+    });
+  });
+
+  describe('GET /users/:id errores', () => {
+    it('debe retornar 404 para usuario inexistente', async () => {
+      const res = await request(app.getHttpServer()).get('/users/999999');
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('DELETE /users/:id errores', () => {
+    it('debe retornar 404 al intentar eliminar usuario inexistente', async () => {
+      const res = await request(app.getHttpServer()).delete('/users/999999');
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('Flujo completo', () => {
+    it('debe crear, obtener, listar y eliminar usuario', async () => {
+      const userData = { name: 'Usuario Flujo', email: 'flujo@example.com' };
+      
+      const createRes = await request(app.getHttpServer())
+        .post('/users')
+        .send(userData);
+      expect(createRes.status).toBe(201);
+      
+      const userId = createRes.body.id;
+      const getRes = await request(app.getHttpServer()).get(`/users/${userId}`);
+      expect(getRes.status).toBe(200);
+      
+      const deleteRes = await request(app.getHttpServer()).delete(`/users/${userId}`);
+      expect(deleteRes.status).toBe(200);
+      
+      const finalGetRes = await request(app.getHttpServer()).get(`/users/${userId}`);
+      expect(finalGetRes.status).toBe(404);
+    });
+  });
 }); 
